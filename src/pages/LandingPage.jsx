@@ -6,7 +6,7 @@ const LandingPage = ({ onGetStarted }) => {
   return (
     <div className="landing-container">
       <nav className="landing-nav">
-        <div className="logo">🥋 Shokunin</div>
+        <div className="logo">💪 Shokunin</div>
         <div className="nav-actions">
           <ThemeToggle />
           <button className="btn-login" onClick={() => onGetStarted('login')}>Login</button>
@@ -16,7 +16,7 @@ const LandingPage = ({ onGetStarted }) => {
       <section className="hero">
         <h1 className="hero-title">Build Your <span className="highlight">Daily Routine</span></h1>
         <p className="hero-subtitle">
-          Master the art of consistency. Track your workouts, maintain your streak, 
+          Master the art of consistency. Track your workouts, maintain your streak,
           and forge discipline like a true craftsman.
         </p>
         <button className="btn-primary btn-hero" onClick={() => onGetStarted('signup')}>
