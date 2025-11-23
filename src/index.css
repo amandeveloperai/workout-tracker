@@ -75,7 +75,7 @@ h2,
 h3 {
   font-weight: 700;
   letter-spacing: -0.025em;
-  color: white;
+  color: var(--text-main);
 }
 
 h1 {
@@ -149,7 +149,7 @@ button:active {
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.1);
-  color: white;
+  color: var(--text-main);
   padding: 10px 20px;
   border-radius: var(--radius-full);
   font-weight: 500;
@@ -175,7 +175,7 @@ input {
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  color: white;
+  color: var(--text-main);
   font-size: 1rem;
   /* Prevent zoom on iOS */
   transition: border-color 0.2s;
