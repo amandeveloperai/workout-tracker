@@ -19,7 +19,7 @@ const LandingPage = ({ onGetStarted }) => {
           Master the art of consistency. Track your workouts, maintain your streak,
           and forge discipline like a true craftsman.
         </p>
-        <button className="btn-primary btn-hero" onClick={() => onGetStarted('signup')}>
+        <button className="btn-primary btn-hero" onClick={() => onGetStarted('login')}>
           Start Your Journey
         </button>
       </section>
