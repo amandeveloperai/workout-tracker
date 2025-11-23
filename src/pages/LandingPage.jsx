@@ -94,8 +94,8 @@ const LandingPage = ({ onGetStarted }) => {
 
         .btn-login {
           background: transparent;
-          color: white;
-          border: 1px solid rgba(255,255,255,0.2);
+          color: var(--text-main);
+          border: 1px solid var(--border);
           padding: 8px 20px;
           border-radius: var(--radius-full);
           transition: all 0.2s;
