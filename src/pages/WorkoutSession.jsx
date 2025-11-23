@@ -1,0 +1,246 @@
+import { useState } from 'react';
+import { useStore } from '../context/StoreContext';
+import { getNextWeight } from '../utils/progression';
+import { calculateXP, calculateStreak, checkNewBadges, calculateLevel } from '../services/Gamification';
+
+const EXERCISE_LIST = [
+  'Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Pull Up', 'Dumbbell Row', 'Lunges'
+];
+
+const WorkoutSession = ({ onFinish }) => {
+  const { user, workouts, addWorkout, updateUserStats } = useStore();
+  const [exercises, setExercises] = useState([]);
+  const [selectedExercise, setSelectedExercise] = useState(EXERCISE_LIST[0]);
+
+  const handleAddExercise = () => {
+    const name = selectedExercise;
+    const targetWeight = getNextWeight(name, workouts);
+    setExercises([...exercises, {
+      id: Date.now(),
+      name,
+      targetWeight,
+      sets: 3,
+      reps: 10,
+      weight: targetWeight || 20
+    }]);
+  };
+
+  const updateExercise = (index, field, value) => {
+    const newExercises = [...exercises];
+    newExercises[index][field] = Number(value);
+    setExercises(newExercises);
+  };
+
+  const removeExercise = (index) => {
+    const newExercises = exercises.filter((_, i) => i !== index);
+    setExercises(newExercises);
+  };
+
+  const handleFinishWorkout = () => {
+    if (exercises.length === 0) return;
+
+    const workout = {
+      id: crypto.randomUUID(),
+      date: new Date().toISOString(),
+      exercises
+    };
+
+    // Calculate rewards
+    const xpEarned = calculateXP(workout);
+    const newStreak = calculateStreak(user.lastWorkoutDate, user.streak);
+    const newXP = user.xp + xpEarned;
+    const newLevel = calculateLevel(newXP);
+
+    const updatedUser = {
+      ...user,
+      streak: newStreak,
+      xp: newXP,
+      level: newLevel,
+      lastWorkoutDate: new Date().toISOString()
+    };
+
+    const newBadges = checkNewBadges(updatedUser, workout);
+
+    // Save everything
+    addWorkout(workout);
+    updateUserStats({
+      streak: newStreak,
+      xp: updatedUser.xp,
+      level: updatedUser.level,
+      lastWorkoutDate: updatedUser.lastWorkoutDate,
+      badges: [...user.badges, ...newBadges]
+    });
+
+    onFinish();
+  };
+
+  // Calculate potential XP for display
+  const xpEarned = exercises.length * 10; // Simplified preview
+
+  return (
+    <div className="workout-session">
+      <header className="flex-between mb-2">
+        <h2>Workout Session</h2>
+        <div className="xp-badge">+{xpEarned} XP</div>
+      </header>
+
+      <div className="exercise-list">
+        {exercises.map((exercise, index) => (
+          <div key={index} className="card exercise-card glass-panel">
+            <div className="exercise-header">
+              <h3>{exercise.name}</h3>
+              <button
+                className="btn-icon delete-btn"
+                onClick={() => removeExercise(index)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="exercise-inputs">
+              <div className="input-col">
+                <label>Sets</label>
+                <input
+                  type="number"
+                  value={exercise.sets}
+                  onChange={(e) => updateExercise(index, 'sets', e.target.value)}
+                  placeholder="0"
+                  inputMode="numeric"
+                />
+              </div>
+              <div className="input-col">
+                <label>Reps</label>
+                <input
+                  type="number"
+                  value={exercise.reps}
+                  onChange={(e) => updateExercise(index, 'reps', e.target.value)}
+                  placeholder="0"
+                  inputMode="numeric"
+                />
+              </div>
+              <div className="input-col">
+                <label>Lbs</label>
+                <input
+                  type="number"
+                  value={exercise.weight}
+                  onChange={(e) => updateExercise(index, 'weight', e.target.value)}
+                  placeholder="0"
+                  inputMode="numeric"
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="add-exercise-section">
+        <select
+          value={selectedExercise}
+          onChange={(e) => setSelectedExercise(e.target.value)}
+          className="exercise-select"
+        >
+          {EXERCISE_LIST.map(ex => (
+            <option key={ex} value={ex}>{ex}</option>
+          ))}
+        </select>
+        <button onClick={handleAddExercise} className="btn-secondary btn-full mt-2">
+          + Add Exercise
+        </button>
+      </div>
+
+      <div className="action-bar">
+        <button onClick={handleFinishWorkout} className="btn-primary btn-full finish-btn">
+          Finish Workout
+        </button>
+      </div>
+
+      <style>{`
+                .workout-session {
+                    padding-bottom: 80px;
+                }
+                .xp-badge {
+                    background: rgba(16, 185, 129, 0.2);
+                    color: var(--accent);
+                    padding: 4px 12px;
+                    border-radius: var(--radius-full);
+                    font-weight: 700;
+                    font-size: 0.9rem;
+                }
+                .exercise-card {
+                    margin-bottom: 16px;
+                    animation: slideIn 0.3s ease-out;
+                }
+                @keyframes slideIn {
+                    from { opacity: 0; transform: translateY(10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                .exercise-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 12px;
+                }
+                .exercise-header h3 {
+                    font-size: 1.1rem;
+                    color: white;
+                }
+                .delete-btn {
+                    color: var(--error);
+                    opacity: 0.7;
+                }
+                .exercise-inputs {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 12px;
+                }
+                .input-col label {
+                    text-align: center;
+                    font-size: 0.75rem;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+                .input-col input {
+                    text-align: center;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    padding: 12px 8px;
+                }
+                
+                .exercise-select {
+                    width: 100%;
+                    padding: 16px;
+                    background: var(--bg-card);
+                    border: 1px solid var(--border);
+                    border-radius: var(--radius-md);
+                    color: white;
+                    font-size: 1rem;
+                    appearance: none;
+                    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+                    background-repeat: no-repeat;
+                    background-position: right 16px center;
+                    background-size: 16px;
+                }
+
+                .action-bar {
+                    position: fixed;
+                    bottom: 90px; /* Above nav bar */
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: calc(100% - 40px);
+                    max-width: 400px;
+                    z-index: 90;
+                }
+                
+                .finish-btn {
+                    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+                    font-size: 1.1rem;
+                    padding: 16px;
+                }
+                
+                .mb-2 { margin-bottom: 16px; }
+                .mt-2 { margin-top: 12px; }
+            `}</style>
+    </div>
+  );
+};
+
+export default WorkoutSession;
