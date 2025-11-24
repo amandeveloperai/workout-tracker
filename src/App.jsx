@@ -3,6 +3,7 @@ import { StoreProvider, useStore } from './context/StoreContext';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import WorkoutSession from './pages/WorkoutSession';
+import WorkoutHistory from './pages/WorkoutHistory';
 import Badges from './pages/Badges';
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
@@ -25,6 +26,8 @@ const AppContent = () => {
         return <Dashboard onStartWorkout={() => setActiveTab('workout')} />;
       case 'workout':
         return <WorkoutSession onFinish={() => setActiveTab('dashboard')} />;
+      case 'history':
+        return <WorkoutHistory />;
       case 'badges':
         return <Badges />;
       default:

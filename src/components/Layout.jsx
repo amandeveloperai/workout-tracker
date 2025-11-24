@@ -19,6 +19,14 @@ const Layout = ({ children, activeTab, onTabChange }) => {
         </button>
 
         <button
+          className={`nav-item ${activeTab === 'history' ? 'active' : ''}`}
+          onClick={() => onTabChange('history')}
+        >
+          <span className="nav-icon">📅</span>
+          <span className="nav-label">History</span>
+        </button>
+
+        <button
           className={`nav-item ${activeTab === 'workout' ? 'active' : ''}`}
           onClick={() => onTabChange('workout')}
         >

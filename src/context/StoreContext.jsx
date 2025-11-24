@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { auth, googleProvider } from '../firebase';
+import { auth, googleProvider, db } from '../firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 
 const StoreContext = createContext();
 
@@ -31,23 +32,39 @@ export const StoreProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
 
-    // Sync with Firebase Auth
+    // Sync with Firebase Auth & Firestore
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setCurrentUser(user);
-                // Load data for this user
-                const saved = localStorage.getItem(`workout-tracker-data-${user.uid}`);
-                if (saved) {
-                    setData(JSON.parse(saved));
-                } else {
-                    // Initialize new user data
-                    const newData = {
-                        user: { ...INITIAL_USER_STATE, name: user.displayName || user.email.split('@')[0] },
-                        workouts: []
-                    };
-                    setData(newData);
-                    localStorage.setItem(`workout-tracker-data-${user.uid}`, JSON.stringify(newData));
+                try {
+                    const userRef = doc(db, "users", user.uid);
+                    const userSnap = await getDoc(userRef);
+
+                    if (userSnap.exists()) {
+                        setData(userSnap.data());
+                    } else {
+                        // Initialize new user data in Firestore
+                        const newData = {
+                            user: { ...INITIAL_USER_STATE, name: user.displayName || user.email.split('@')[0] },
+                            workouts: []
+                        };
+                        await setDoc(userRef, newData);
+                        setData(newData);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user data:", error);
+                    // Fallback to local storage or empty state if Firestore fails (e.g. permissions)
+                    const saved = localStorage.getItem(`workout-tracker-data-${user.uid}`);
+                    if (saved) {
+                        setData(JSON.parse(saved));
+                    } else {
+                        const newData = {
+                            user: { ...INITIAL_USER_STATE, name: user.displayName || user.email.split('@')[0] },
+                            workouts: []
+                        };
+                        setData(newData);
+                    }
                 }
             } else {
                 setCurrentUser(null);
@@ -59,17 +76,9 @@ export const StoreProvider = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
-    // Persist Data
-    useEffect(() => {
-        if (currentUser && data) {
-            localStorage.setItem(`workout-tracker-data-${currentUser.uid}`, JSON.stringify(data));
-        }
-    }, [data, currentUser]);
-
     // Auth Actions
     const loginWithGoogle = async () => {
         try {
-            // Check for placeholder config
             if (auth.app.options.apiKey === "YOUR_API_KEY") {
                 throw new Error("Firebase not configured. Please update src/firebase.js with your keys.");
             }
@@ -77,15 +86,7 @@ export const StoreProvider = ({ children }) => {
             return { success: true };
         } catch (error) {
             console.error("Google Login Error:", error);
-            let errorMessage = error.message;
-            if (error.code === 'auth/api-key-not-valid-please-pass-in-a-valid-api-key') {
-                errorMessage = "Invalid Firebase API Key. Check src/firebase.js.";
-            } else if (error.message.includes("Firebase not configured")) {
-                errorMessage = error.message;
-            } else {
-                errorMessage = "Google Login failed. Check console for details.";
-            }
-            return { success: false, error: errorMessage };
+            return { success: false, error: error.message };
         }
     };
 
@@ -98,25 +99,46 @@ export const StoreProvider = ({ children }) => {
     };
 
     // Data Actions
-    const addWorkout = (workout) => {
+    const addWorkout = async (workout) => {
+        // Optimistic update
         setData(prev => ({
             ...prev,
             workouts: [workout, ...prev.workouts]
         }));
+
+        if (currentUser) {
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                await updateDoc(userRef, {
+                    workouts: arrayUnion(workout)
+                });
+            } catch (error) {
+                console.error("Error saving workout:", error);
+            }
+        }
     };
 
-    const updateUserStats = (updates) => {
+    const updateUserStats = async (updates) => {
+        // Optimistic update
         setData(prev => ({
             ...prev,
             user: { ...prev.user, ...updates }
         }));
-    };
 
-    // Legacy/Mock Login (for testing without Firebase keys)
-    // Keeping this as a fallback or for the "password" flow if we want to keep it
-    // But user asked for Google Auth. Let's keep it simple and focus on Firebase.
-    // Actually, let's keep the mock login as a "Guest" or "Local" mode if Firebase fails?
-    // No, user specifically asked for Google Auth.
+        if (currentUser) {
+            try {
+                const userRef = doc(db, "users", currentUser.uid);
+                // We need to update nested fields. Firestore dot notation: "user.xp": ...
+                const firestoreUpdates = {};
+                for (const [key, value] of Object.entries(updates)) {
+                    firestoreUpdates[`user.${key}`] = value;
+                }
+                await updateDoc(userRef, firestoreUpdates);
+            } catch (error) {
+                console.error("Error updating stats:", error);
+            }
+        }
+    };
 
     return (
         <StoreContext.Provider value={{

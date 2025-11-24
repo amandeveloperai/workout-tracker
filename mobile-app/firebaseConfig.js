@@ -1,9 +1,9 @@
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Your web app's Firebase configuration
+// Using the same config as web app for now
 const firebaseConfig = {
     apiKey: "AIzaSyAOC7HKO557OZIY2sOKubjaazk1ZxpKxdo",
     authDomain: "workout-tracker-52fc7.firebaseapp.com",
@@ -14,13 +14,8 @@ const firebaseConfig = {
     measurementId: "G-T8H89EHWH0"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
-// Initialize Firebase Authentication and get a reference to the service
-export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
+export const app = initializeApp(firebaseConfig);
+export const auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage)
+});
 export const db = getFirestore(app);
-
-export default app;
