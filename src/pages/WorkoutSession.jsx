@@ -3,9 +3,12 @@ import { useStore } from '../context/StoreContext';
 import { getNextWeight } from '../utils/progression';
 import { calculateXP, calculateStreak, checkNewBadges, calculateLevel } from '../services/Gamification';
 import ExerciseSelector from '../components/ExerciseSelector';
+import BossVictoryModal from '../components/BossVictoryModal';
 
 const WorkoutSession = ({ onFinish }) => {
   const { user, workouts, addWorkout, updateUserStats, updateBossProgress, currentWorkout, setCurrentWorkout } = useStore();
+  const [showVictory, setShowVictory] = useState(false);
+  const [defeatedBoss, setDefeatedBoss] = useState(null);
 
   const handleAddExercise = (name) => {
     if (!name) return;
@@ -32,7 +35,7 @@ const WorkoutSession = ({ onFinish }) => {
     setCurrentWorkout(newExercises);
   };
 
-  const handleFinishWorkout = () => {
+  const handleFinishWorkout = async () => {
     if (currentWorkout.length === 0) return;
 
     const workout = {
@@ -71,7 +74,19 @@ const WorkoutSession = ({ onFinish }) => {
       badges: [...user.badges, ...newBadges]
     });
 
-    updateBossProgress(damage);
+    const bossResult = await updateBossProgress(damage);
+
+    if (bossResult?.defeated) {
+      setDefeatedBoss(bossResult.boss);
+      setShowVictory(true);
+    } else {
+      setCurrentWorkout([]); // Clear workout
+      onFinish();
+    }
+  };
+
+  const handleVictoryClose = () => {
+    setShowVictory(false);
     setCurrentWorkout([]); // Clear workout
     onFinish();
   };
@@ -225,6 +240,10 @@ const WorkoutSession = ({ onFinish }) => {
                 .mb-2 { margin-bottom: 16px; }
                 .mt-2 { margin-top: 12px; }
             `}</style>
+
+      {showVictory && defeatedBoss && (
+        <BossVictoryModal boss={defeatedBoss} onClose={handleVictoryClose} />
+      )}
     </div>
   );
 };

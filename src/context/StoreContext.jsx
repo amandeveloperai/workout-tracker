@@ -178,24 +178,27 @@ export const StoreProvider = ({ children }) => {
     };
 
     const updateBossProgress = async (damage) => {
-        if (!data?.user) return;
+        if (!data?.user) return { defeated: false };
 
         const currentBoss = data.user.boss || { hp: 1000, maxHp: 1000, level: 1, name: "Iron Titan" };
         let newHp = currentBoss.hp - damage;
         let newLevel = currentBoss.level;
         let newMaxHp = currentBoss.maxHp;
+        let defeated = false;
 
         if (newHp <= 0) {
             // Boss Defeated!
+            defeated = true;
             newLevel += 1;
             newMaxHp = Math.floor(newMaxHp * 1.5);
             newHp = newMaxHp;
-            // TODO: Trigger victory event/modal
         }
 
         const newBossState = { ...currentBoss, hp: newHp, maxHp: newMaxHp, level: newLevel };
 
         updateUserStats({ boss: newBossState });
+
+        return { defeated, boss: newBossState };
     };
 
     return (
