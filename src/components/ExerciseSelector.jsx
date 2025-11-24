@@ -13,15 +13,27 @@ const ExerciseSelector = ({ onAdd }) => {
     if (inputValue.trim()) {
       const filtered = DEFAULT_EXERCISES.filter(ex =>
         ex.toLowerCase().includes(inputValue.toLowerCase())
-      ).slice(0, 8); // Limit to 8 results
+      ).slice(0, 8);
       setFilteredExercises(filtered);
       setIsOpen(filtered.length > 0);
     } else {
-      setFilteredExercises([]);
-      setIsOpen(false);
+      // Show recommendations when empty
+      setFilteredExercises(DEFAULT_EXERCISES.slice(0, 8));
+      // Don't auto-close here, let blur/selection handle it
+      // But we need to know if we should be open.
+      // We'll handle this in onFocus/onChange
     }
     setSelectedIndex(0);
   }, [inputValue]);
+
+  const handleFocus = () => {
+    if (!inputValue.trim()) {
+      setFilteredExercises(DEFAULT_EXERCISES.slice(0, 8));
+      setIsOpen(true);
+    } else {
+      setIsOpen(true);
+    }
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -95,7 +107,7 @@ const ExerciseSelector = ({ onAdd }) => {
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => inputValue && setIsOpen(true)}
+          onFocus={handleFocus}
           placeholder="Type or search exercise..."
           className="exercise-input-modern"
         />
@@ -142,7 +154,7 @@ const ExerciseSelector = ({ onAdd }) => {
           background: var(--bg-card);
           border: 2px solid rgba(139, 92, 246, 0.3);
           border-radius: 16px;
-          color: white;
+          color: var(--text-main);
           font-size: 1rem;
           transition: all 0.3s;
           outline: none;
@@ -191,7 +203,7 @@ const ExerciseSelector = ({ onAdd }) => {
           top: calc(100% + 8px);
           left: 0;
           right: 0;
-          background: rgba(20, 20, 25, 0.98);
+          background: var(--bg-card);
           backdrop-filter: blur(20px);
           border: 1px solid rgba(139, 92, 246, 0.3);
           border-radius: 16px;
@@ -199,7 +211,7 @@ const ExerciseSelector = ({ onAdd }) => {
           max-height: 320px;
           overflow-y: auto;
           z-index: 100;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+          box-shadow: var(--shadow-lg);
           animation: slideDown 0.2s ease-out;
         }
 
@@ -228,7 +240,7 @@ const ExerciseSelector = ({ onAdd }) => {
         .dropdown-item:hover,
         .dropdown-item.selected {
           background: rgba(139, 92, 246, 0.15);
-          color: white;
+          color: var(--primary);
         }
         .exercise-icon {
           font-size: 1.2rem;
