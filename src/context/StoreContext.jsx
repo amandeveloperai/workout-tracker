@@ -11,7 +11,8 @@ const INITIAL_USER_STATE = {
     level: 1,
     streak: 0,
     lastWorkoutDate: null,
-    badges: []
+    badges: [],
+    boss: { hp: 1000, maxHp: 1000, level: 1, name: "Iron Titan" }
 };
 
 export const StoreProvider = ({ children }) => {
@@ -31,6 +32,10 @@ export const StoreProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState(null);
+
+    // AI & Boss State
+    const [apiKey, setApiKey] = useState(() => localStorage.getItem('gemini_api_key') || '');
+    const [currentWorkout, setCurrentWorkout] = useState([]);
 
     // Sync with Firebase Auth & Firestore
     useEffect(() => {
@@ -160,6 +165,32 @@ export const StoreProvider = ({ children }) => {
         }
     };
 
+    const saveApiKey = (key) => {
+        setApiKey(key);
+        localStorage.setItem('gemini_api_key', key);
+    };
+
+    const updateBossProgress = async (damage) => {
+        if (!data?.user) return;
+
+        const currentBoss = data.user.boss || { hp: 1000, maxHp: 1000, level: 1, name: "Iron Titan" };
+        let newHp = currentBoss.hp - damage;
+        let newLevel = currentBoss.level;
+        let newMaxHp = currentBoss.maxHp;
+
+        if (newHp <= 0) {
+            // Boss Defeated!
+            newLevel += 1;
+            newMaxHp = Math.floor(newMaxHp * 1.5);
+            newHp = newMaxHp;
+            // TODO: Trigger victory event/modal
+        }
+
+        const newBossState = { ...currentBoss, hp: newHp, maxHp: newMaxHp, level: newLevel };
+
+        updateUserStats({ boss: newBossState });
+    };
+
     return (
         <StoreContext.Provider value={{
             user: data?.user,
@@ -173,7 +204,12 @@ export const StoreProvider = ({ children }) => {
             signupWithEmail,
             logout,
             addWorkout,
-            updateUserStats
+            updateUserStats,
+            apiKey,
+            saveApiKey,
+            updateBossProgress,
+            currentWorkout,
+            setCurrentWorkout
         }}>
             {!loading && children}
         </StoreContext.Provider>

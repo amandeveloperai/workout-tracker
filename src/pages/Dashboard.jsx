@@ -1,9 +1,15 @@
+import { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { getTodayDate, isSameDay } from '../utils/dateUtils';
 import { BADGES, calculateLevel } from '../services/Gamification';
+import BossCard from '../components/BossCard';
+import SettingsModal from '../components/SettingsModal';
+import SenseiModal from '../components/SenseiModal';
 
-const Dashboard = ({ onNavigate }) => {
-  const { user, logout, workouts } = useStore();
+const Dashboard = ({ onNavigate, onStartWorkout }) => {
+  const { user, logout, workouts, setCurrentWorkout } = useStore();
+  const [showSettings, setShowSettings] = useState(false);
+  const [showSensei, setShowSensei] = useState(false);
 
   // Calculate progress to next level
   const level = calculateLevel(user.xp);
@@ -15,6 +21,12 @@ const Dashboard = ({ onNavigate }) => {
   const earnedBadgesSet = new Set(user.badges);
   const nextBadges = BADGES.filter(b => !earnedBadgesSet.has(b.id)).slice(0, 2);
 
+  const handleSenseiAccept = (exercises) => {
+    setCurrentWorkout(exercises);
+    setShowSensei(false);
+    onStartWorkout();
+  };
+
   return (
     <div className="dashboard">
       <header className="header flex-between">
@@ -22,10 +34,25 @@ const Dashboard = ({ onNavigate }) => {
           <h1 className="greeting">Hello, <span className="text-gradient">{user.name}</span></h1>
           <p className="subtitle">Ready to conquer today?</p>
         </div>
-        <button onClick={logout} className="btn-icon" aria-label="Logout">
-          🚪
-        </button>
+        <div className="header-actions">
+          <button onClick={() => setShowSettings(true)} className="btn-icon" aria-label="Settings">
+            ⚙️
+          </button>
+        </div>
       </header>
+
+      <BossCard />
+
+      <div className="ai-actions mb-4">
+        <button className="btn-sensei glass-panel" onClick={() => setShowSensei(true)}>
+          <span className="sensei-icon">🧙‍♂️</span>
+          <div className="sensei-text">
+            <h3>Ask Sensei</h3>
+            <p>Get a personalized AI workout plan</p>
+          </div>
+          <span className="arrow">→</span>
+        </button>
+      </div>
 
       <div className="stats-grid">
         <div className="card stat-card glass-panel">
@@ -89,7 +116,7 @@ const Dashboard = ({ onNavigate }) => {
           {workouts.length === 0 ? (
             <div className="card empty-card">
               <p>No workouts yet. Start your legend today!</p>
-              <button onClick={() => onNavigate('workout')} className="btn-primary mt-2">
+              <button onClick={() => onStartWorkout()} className="btn-primary mt-2">
                 Start First Workout
               </button>
             </div>
@@ -98,7 +125,7 @@ const Dashboard = ({ onNavigate }) => {
               <div key={index} className="card workout-card glass-panel">
                 <div className="workout-header">
                   <span className="workout-date">{new Date(workout.date).toLocaleDateString()}</span>
-                  <span className="workout-xp">+{workout.xpEarned} XP</span>
+                  <span className="workout-xp">+{workout.xpEarned || 0} XP</span>
                 </div>
                 <div className="workout-summary">
                   {workout.exercises.length} Exercises Completed
@@ -108,6 +135,9 @@ const Dashboard = ({ onNavigate }) => {
           )}
         </div>
       </section>
+
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showSensei && <SenseiModal onClose={() => setShowSensei(false)} onAccept={handleSenseiAccept} />}
 
       <style>{`
                 .header {
@@ -122,6 +152,27 @@ const Dashboard = ({ onNavigate }) => {
                     color: var(--text-muted);
                     font-size: 0.9rem;
                 }
+                .header-actions {
+                    display: flex; gap: 12px;
+                }
+                
+                .btn-sensei {
+                    width: 100%;
+                    display: flex;
+                    align-items: center;
+                    padding: 16px;
+                    border: 1px solid var(--primary);
+                    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(0,0,0,0));
+                    border-radius: 16px;
+                    cursor: pointer;
+                    transition: transform 0.2s;
+                    text-align: left;
+                }
+                .btn-sensei:active { transform: scale(0.98); }
+                .sensei-icon { font-size: 2rem; margin-right: 16px; }
+                .sensei-text h3 { color: var(--primary); margin-bottom: 4px; }
+                .sensei-text p { color: var(--text-muted); font-size: 0.8rem; }
+                .arrow { margin-left: auto; color: var(--primary); font-size: 1.5rem; }
                 
                 .stats-grid {
                     display: grid;
@@ -185,6 +236,7 @@ const Dashboard = ({ onNavigate }) => {
                     margin-bottom: 32px;
                 }
                 .mb-2 { margin-bottom: 16px; }
+                .mb-4 { margin-bottom: 24px; }
                 .mt-2 { margin-top: 16px; }
                 
                 .see-all {

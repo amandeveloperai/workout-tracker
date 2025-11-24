@@ -8,14 +8,13 @@ const EXERCISE_LIST = [
 ];
 
 const WorkoutSession = ({ onFinish }) => {
-  const { user, workouts, addWorkout, updateUserStats } = useStore();
-  const [exercises, setExercises] = useState([]);
+  const { user, workouts, addWorkout, updateUserStats, updateBossProgress, currentWorkout, setCurrentWorkout } = useStore();
   const [selectedExercise, setSelectedExercise] = useState(EXERCISE_LIST[0]);
 
   const handleAddExercise = () => {
     const name = selectedExercise;
     const targetWeight = getNextWeight(name, workouts);
-    setExercises([...exercises, {
+    setCurrentWorkout([...currentWorkout, {
       id: Date.now(),
       name,
       targetWeight,
@@ -26,23 +25,23 @@ const WorkoutSession = ({ onFinish }) => {
   };
 
   const updateExercise = (index, field, value) => {
-    const newExercises = [...exercises];
+    const newExercises = [...currentWorkout];
     newExercises[index][field] = Number(value);
-    setExercises(newExercises);
+    setCurrentWorkout(newExercises);
   };
 
   const removeExercise = (index) => {
-    const newExercises = exercises.filter((_, i) => i !== index);
-    setExercises(newExercises);
+    const newExercises = currentWorkout.filter((_, i) => i !== index);
+    setCurrentWorkout(newExercises);
   };
 
   const handleFinishWorkout = () => {
-    if (exercises.length === 0) return;
+    if (currentWorkout.length === 0) return;
 
     const workout = {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
-      exercises
+      exercises: currentWorkout
     };
 
     // Calculate rewards
@@ -50,6 +49,10 @@ const WorkoutSession = ({ onFinish }) => {
     const newStreak = calculateStreak(user.lastWorkoutDate, user.streak);
     const newXP = user.xp + xpEarned;
     const newLevel = calculateLevel(newXP);
+
+    // Calculate Boss Damage (Volume / 50)
+    const totalVolume = currentWorkout.reduce((acc, ex) => acc + (ex.sets * ex.reps * ex.weight), 0);
+    const damage = Math.floor(totalVolume / 50);
 
     const updatedUser = {
       ...user,
@@ -71,11 +74,13 @@ const WorkoutSession = ({ onFinish }) => {
       badges: [...user.badges, ...newBadges]
     });
 
+    updateBossProgress(damage);
+    setCurrentWorkout([]); // Clear workout
     onFinish();
   };
 
   // Calculate potential XP for display
-  const xpEarned = exercises.length * 10; // Simplified preview
+  const xpEarned = currentWorkout.length * 10; // Simplified preview
 
   return (
     <div className="workout-session">
@@ -85,7 +90,7 @@ const WorkoutSession = ({ onFinish }) => {
       </header>
 
       <div className="exercise-list">
-        {exercises.map((exercise, index) => (
+        {currentWorkout.map((exercise, index) => (
           <div key={index} className="card exercise-card glass-panel">
             <div className="exercise-header">
               <h3>{exercise.name}</h3>

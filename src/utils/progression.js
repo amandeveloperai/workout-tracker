@@ -1,16 +1,24 @@
 export const getNextWeight = (exerciseName, history) => {
-    // Find the last time this exercise was performed
-    const lastWorkout = history.find(w =>
-        w.exercises.some(e => e.name === exerciseName)
-    );
+    // Filter history for this exercise
+    const exerciseHistory = history
+        .filter(w => w.exercises.some(e => e.name === exerciseName))
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .slice(0, 3); // Last 3 sessions
 
-    if (!lastWorkout) return null;
+    if (!exerciseHistory.length) return null;
 
-    const lastExercise = lastWorkout.exercises.find(e => e.name === exerciseName);
-    if (!lastExercise || !lastExercise.sets.length) return null;
+    const lastSession = exerciseHistory[0].exercises.find(e => e.name === exerciseName);
+    if (!lastSession || !lastSession.sets || !lastSession.sets.length) return null;
 
-    // Simple progression: Find max weight used and add 2.5kg
-    const maxWeight = Math.max(...lastExercise.sets.map(s => s.weight || 0));
+    const maxWeight = Math.max(...lastSession.sets.map(s => Number(s.weight) || 0));
 
-    return maxWeight > 0 ? maxWeight + 2.5 : null;
+    // Intelligent Logic:
+    // If they performed well (>= 10 reps on top sets), suggest increase.
+    const strongSets = lastSession.sets.filter(s => Number(s.weight) === maxWeight && Number(s.reps) >= 8);
+
+    if (strongSets.length >= 2) {
+        return maxWeight + 2.5; // Progressive Overload
+    }
+
+    return maxWeight; // Maintenance
 };
