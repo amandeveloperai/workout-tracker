@@ -38,6 +38,9 @@ const Dashboard = ({ onNavigate, onStartWorkout }) => {
           <button onClick={() => setShowSettings(true)} className="btn-icon" aria-label="Settings">
             ⚙️
           </button>
+          <button onClick={logout} className="btn-icon" aria-label="Logout">
+            🚪
+          </button>
         </div>
       </header>
 
