@@ -84,6 +84,7 @@ export const StoreProvider = ({ children }) => {
 
     // Auth Actions
     const loginWithGoogle = async () => {
+        setLoading(true);
         try {
             if (auth.app.options.apiKey === "YOUR_API_KEY") {
                 throw new Error("Firebase not configured. Please update src/firebase.js with your keys.");
@@ -92,26 +93,31 @@ export const StoreProvider = ({ children }) => {
             return { success: true };
         } catch (error) {
             console.error("Google Login Error:", error);
+            setLoading(false);
             return { success: false, error: error.message };
         }
     };
 
     const loginWithEmail = async (email, password) => {
+        setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, email, password);
             return { success: true };
         } catch (error) {
             console.error("Login Error:", error);
+            setLoading(false);
             return { success: false, error: error.message };
         }
     };
 
     const signupWithEmail = async (email, password) => {
+        setLoading(true);
         try {
             await createUserWithEmailAndPassword(auth, email, password);
             return { success: true };
         } catch (error) {
             console.error("Signup Error:", error);
+            setLoading(false);
             return { success: false, error: error.message };
         }
     };
