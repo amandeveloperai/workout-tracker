@@ -9,6 +9,9 @@ const WorkoutSession = ({ onFinish }) => {
   const { user, workouts, addWorkout, updateUserStats, updateBossProgress, currentWorkout, setCurrentWorkout } = useStore();
   const [showVictory, setShowVictory] = useState(false);
   const [defeatedBoss, setDefeatedBoss] = useState(null);
+  const [unit, setUnit] = useState('kg');
+
+  const toggleUnit = () => setUnit(prev => prev === 'kg' ? 'lbs' : 'kg');
 
   const handleAddExercise = (name) => {
     if (!name) return;
@@ -20,13 +23,14 @@ const WorkoutSession = ({ onFinish }) => {
       targetWeight,
       sets: 3,
       reps: 10,
-      weight: targetWeight || 20
+      weight: targetWeight || 20,
+      unit // Store unit with exercise
     }]);
   };
 
   const updateExercise = (index, field, value) => {
     const newExercises = [...currentWorkout];
-    newExercises[index][field] = Number(value);
+    newExercises[index][field] = field === 'name' ? value : Number(value);
     setCurrentWorkout(newExercises);
   };
 
@@ -98,7 +102,12 @@ const WorkoutSession = ({ onFinish }) => {
     <div className="workout-session">
       <header className="flex-between mb-2">
         <h2>Workout Session</h2>
-        <div className="xp-badge">+{xpEarned} XP</div>
+        <div className="header-controls">
+          <button onClick={toggleUnit} className="unit-toggle">
+            {unit.toUpperCase()}
+          </button>
+          <div className="xp-badge">+{xpEarned} XP</div>
+        </div>
       </header>
 
       <div className="exercise-list">
@@ -135,7 +144,7 @@ const WorkoutSession = ({ onFinish }) => {
                 />
               </div>
               <div className="input-col">
-                <label>Lbs</label>
+                <label>{exercise.unit || unit}</label>
                 <input
                   type="number"
                   value={exercise.weight}
@@ -163,6 +172,20 @@ const WorkoutSession = ({ onFinish }) => {
                 .workout-session {
                     padding-bottom: 80px;
                 }
+                .header-controls {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                }
+                .unit-toggle {
+                    background: rgba(139, 92, 246, 0.1);
+                    border: 1px solid rgba(139, 92, 246, 0.3);
+                    color: var(--primary);
+                    padding: 6px 12px;
+                    border-radius: 8px;
+                    font-weight: 700;
+                    font-size: 0.8rem;
+                }
                 .xp-badge {
                     background: rgba(16, 185, 129, 0.2);
                     color: var(--accent);
@@ -187,7 +210,7 @@ const WorkoutSession = ({ onFinish }) => {
                 }
                 .exercise-header h3 {
                     font-size: 1.1rem;
-                    color: white;
+                    color: var(--text-main);
                 }
                 .delete-btn {
                     color: var(--error);
@@ -209,6 +232,7 @@ const WorkoutSession = ({ onFinish }) => {
                     font-size: 1.1rem;
                     font-weight: 600;
                     padding: 12px 8px;
+                    color: var(--text-main);
                 }
                 
                 .exercise-input {
@@ -217,7 +241,7 @@ const WorkoutSession = ({ onFinish }) => {
                     background: var(--bg-card);
                     border: 1px solid var(--border);
                     border-radius: var(--radius-md);
-                    color: white;
+                    color: var(--text-main);
                     font-size: 1rem;
                 }
 

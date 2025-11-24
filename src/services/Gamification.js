@@ -24,7 +24,7 @@ export const calculateXP = (workout) => {
 
     // XP for sets
     workout.exercises.forEach(ex => {
-        xp += ex.sets.length * 10;
+        xp += (ex.sets || 0) * 10;
     });
 
     return xp;
