@@ -217,7 +217,7 @@ This typically indicates that your device does not have a healthy Internet conne
         .battle-arena {
           padding: 20px;
           margin-bottom: 24px;
-          background: linear-gradient(180deg, rgba(20, 20, 30, 0.8), rgba(10, 10, 15, 0.9));
+          background: var(--bg-card);
           border: 1px solid rgba(139, 92, 246, 0.2);
         }
 
@@ -271,7 +271,7 @@ This typically indicates that your device does not have a healthy Internet conne
           text-align: center;
           padding: 12px;
           border-radius: 16px;
-          background: rgba(255, 255, 255, 0.03);
+          background: var(--bg-app);
           transition: transform 0.2s;
         }
         .user-card { border: 1px solid rgba(139, 92, 246, 0.3); }
@@ -327,11 +327,13 @@ This typically indicates that your device does not have a healthy Internet conne
           justify-content: center;
           gap: 4px;
           font-size: 0.85rem;
-          background: rgba(0,0,0,0.3);
+          font-size: 0.85rem;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
           padding: 4px 8px;
           border-radius: 8px;
         }
-        .stat-value { font-weight: bold; color: white; }
+        .stat-value { font-weight: bold; color: var(--text-main); }
 
         .hp-bar-mini {
           width: 100%;
@@ -629,7 +631,8 @@ This typically indicates that your device does not have a healthy Internet conne
                     text-align: center;
                     padding: 16px;
                     margin-bottom: 0;
-                    background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+                    background: var(--bg-card);
+                    border: 1px solid rgba(139, 92, 246, 0.1);
                 }
                 .stat-card.full-width {
                     grid-column: span 2;
@@ -643,7 +646,7 @@ This typically indicates that your device does not have a healthy Internet conne
                 }
                 .stat-info h3 {
                     font-size: 1.5rem;
-                    color: white;
+                    color: var(--text-main);
                     margin-bottom: 2px;
                 }
                 .stat-info p {
