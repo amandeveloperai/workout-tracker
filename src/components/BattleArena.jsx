@@ -2,118 +2,118 @@ import { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 
 const BattleArena = () => {
-    const { user } = useStore();
-    const [showInfo, setShowInfo] = useState(false);
+  const { user } = useStore();
+  const [showInfo, setShowInfo] = useState(false);
 
-    // RPG Logic
-    const getUserAvatar = (level) => {
-        if (level >= 50) return { icon: '👑', title: 'Godlike' };
-        if (level >= 30) return { icon: '🐉', title: 'Legend' };
-        if (level >= 20) return { icon: '🧙‍♂️', title: 'Grandmaster' };
-        if (level >= 10) return { icon: '🥷', title: 'Master' };
-        if (level >= 5) return { icon: '⚔️', title: 'Warrior' };
-        return { icon: '🐣', title: 'Novice' };
-    };
+  // RPG Logic
+  const getUserAvatar = (level) => {
+    if (level >= 50) return { icon: '👑', title: 'Godlike' };
+    if (level >= 30) return { icon: '🐉', title: 'Legend' };
+    if (level >= 20) return { icon: '🧙‍♂️', title: 'Grandmaster' };
+    if (level >= 10) return { icon: '🥷', title: 'Master' };
+    if (level >= 5) return { icon: '⚔️', title: 'Warrior' };
+    return { icon: '🐣', title: 'Novice' };
+  };
 
-    const userAvatar = getUserAvatar(user.level);
+  const userAvatar = getUserAvatar(user.level);
 
-    // Calculate Stats
-    const userStrength = Math.floor(user.xp / 10) + (user.streak * 2);
-    const boss = user.boss || { name: "Iron Titan", level: 1, hp: 1000, maxHp: 1000 };
-    const bossDefense = boss.level * 50;
+  // Calculate Stats
+  const userStrength = Math.floor(user.xp / 10) + (user.streak * 2);
+  const boss = user.boss || { name: "Iron Titan", level: 1, hp: 1000, maxHp: 1000 };
+  const bossDefense = boss.level * 50;
 
-    // Battle Status
-    const isOverpowered = userStrength > bossDefense;
-    const hpPercent = Math.max(0, (boss.hp / boss.maxHp) * 100);
+  // Battle Status
+  const isOverpowered = userStrength > bossDefense;
+  const hpPercent = Math.max(0, (boss.hp / boss.maxHp) * 100);
 
-    return (
-        <div className="battle-arena glass-panel">
-            <div className="arena-header">
-                <h3>⚔️ Battle Arena</h3>
-                <button
-                    className="info-btn"
-                    onClick={() => setShowInfo(!showInfo)}
-                    aria-label="Battle Info"
-                >
-                    ℹ️
-                </button>
+  return (
+    <div className="battle-arena glass-panel">
+      <div className="arena-header">
+        <h3>⚔️ Battle Arena</h3>
+        <button
+          className="info-btn"
+          onClick={() => setShowInfo(!showInfo)}
+          aria-label="Battle Info"
+        >
+          ℹ️
+        </button>
+      </div>
+
+      {showInfo && (
+        <div className="arena-info">
+          <p><strong>How to Play:</strong></p>
+          <ul>
+            <li>Your <strong>Avatar</strong> evolves as you level up.</li>
+            <li><strong>Strength</strong> comes from XP and Streaks.</li>
+            <li>Deal damage by completing workouts!</li>
+            <li>If <strong>Strength {'>'} Defense</strong>, you deal <strong>CRITICAL</strong> damage!</li>
+          </ul>
+        </div>
+      )}
+
+      <div className="fighters-container">
+        {/* User Side */}
+        <div className="fighter-card user-card">
+          <div className="fighter-avatar-wrapper">
+            <div className="fighter-avatar user-anim">{userAvatar.icon}</div>
+            <div className="fighter-level">Lvl {user.level}</div>
+          </div>
+          <div className="fighter-details">
+            <div className="fighter-name">{user.name}</div>
+            <div className="fighter-class">{userAvatar.title}</div>
+            <div className="stat-row">
+              <span className="stat-icon">⚔️</span>
+              <span className="stat-label">STR:</span>
+              <span className="stat-value">{userStrength}</span>
             </div>
+          </div>
+        </div>
 
-            {showInfo && (
-                <div className="arena-info">
-                    <p><strong>How to Play:</strong></p>
-                    <ul>
-                        <li>Your <strong>Avatar</strong> evolves as you level up.</li>
-                        <li><strong>Strength</strong> comes from XP and Streaks.</li>
-                        <li>Deal damage by completing workouts!</li>
-                        <li>If <strong>Strength {'>'} Defense</strong>, you deal <strong>CRITICAL</strong> damage!</li>
-                    </ul>
-                </div>
-            )}
+        {/* VS Badge */}
+        <div className="vs-badge">
+          <span>VS</span>
+        </div>
 
-            <div className="fighters-container">
-                {/* User Side */}
-                <div className="fighter-card user-card">
-                    <div className="fighter-avatar-wrapper">
-                        <div className="fighter-avatar user-anim">{userAvatar.icon}</div>
-                        <div className="fighter-level">Lvl {user.level}</div>
-                    </div>
-                    <div className="fighter-details">
-                        <div className="fighter-name">{user.name}</div>
-                        <div className="fighter-class">{userAvatar.title}</div>
-                        <div className="stat-row">
-                            <span className="stat-icon">⚔️</span>
-                            <span className="stat-label">STR:</span>
-                            <span className="stat-value">{userStrength}</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* VS Badge */}
-                <div className="vs-badge">
-                    <span>VS</span>
-                </div>
-
-                {/* Boss Side */}
-                <div className="fighter-card boss-card-mini">
-                    <div className="fighter-avatar-wrapper">
-                        <div className={`fighter-avatar boss-anim ${hpPercent < 25 ? 'critical' : ''}`}>
-                            {getBossEmoji(boss.level)}
-                        </div>
-                        <div className="fighter-level boss-lvl">Lvl {boss.level}</div>
-                    </div>
-                    <div className="fighter-details">
-                        <div className="fighter-name boss-text">{boss.name}</div>
-                        <div className="hp-bar-mini">
-                            <div className="hp-fill" style={{ width: `${hpPercent}%` }}></div>
-                        </div>
-                        <div className="stat-row">
-                            <span className="stat-icon">🛡️</span>
-                            <span className="stat-label">DEF:</span>
-                            <span className="stat-value">{bossDefense}</span>
-                        </div>
-                    </div>
-                </div>
+        {/* Boss Side */}
+        <div className="fighter-card boss-card-mini">
+          <div className="fighter-avatar-wrapper">
+            <div className={`fighter-avatar boss-anim ${hpPercent < 25 ? 'critical' : ''}`}>
+              {getBossEmoji(boss.level)}
             </div>
-
-            {/* Battle Status Message */}
-            <div className="battle-status">
-                {isOverpowered ? (
-                    <div className="status-msg advantage">
-                        🔥 You are overpowering the boss! (+50% DMG)
-                    </div>
-                ) : (
-                    <div className="status-msg disadvantage">
-                        ⚠️ Boss is tough! Keep training to gain Strength.
-                    </div>
-                )}
+            <div className="fighter-level boss-lvl">Lvl {boss.level}</div>
+          </div>
+          <div className="fighter-details">
+            <div className="fighter-name boss-text">{boss.name}</div>
+            <div className="hp-bar-mini">
+              <div className="hp-fill" style={{ width: `${hpPercent}%` }}></div>
             </div>
+            <div className="stat-row">
+              <span className="stat-icon">🛡️</span>
+              <span className="stat-label">DEF:</span>
+              <span className="stat-value">{bossDefense}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <style>{`
+      {/* Battle Status Message */}
+      <div className="battle-status">
+        {isOverpowered ? (
+          <div className="status-msg advantage">
+            🔥 You are overpowering the boss! (+50% DMG)
+          </div>
+        ) : (
+          <div className="status-msg disadvantage">
+            ⚠️ Boss is tough! Keep training to gain Strength.
+          </div>
+        )}
+      </div>
+
+      <style>{`
         .battle-arena {
           padding: 20px;
           margin-bottom: 24px;
-          background: linear-gradient(180deg, rgba(20, 20, 30, 0.8), rgba(10, 10, 15, 0.9));
+          background: var(--bg-card);
           border: 1px solid rgba(139, 92, 246, 0.2);
         }
 
@@ -167,7 +167,7 @@ const BattleArena = () => {
           text-align: center;
           padding: 12px;
           border-radius: 16px;
-          background: rgba(255, 255, 255, 0.03);
+          background: var(--bg-app);
           transition: transform 0.2s;
         }
         .user-card { border: 1px solid rgba(139, 92, 246, 0.3); }
@@ -223,11 +223,13 @@ const BattleArena = () => {
           justify-content: center;
           gap: 4px;
           font-size: 0.85rem;
-          background: rgba(0,0,0,0.3);
+          font-size: 0.85rem;
+          background: var(--bg-card);
+          border: 1px solid var(--border);
           padding: 4px 8px;
           border-radius: 8px;
         }
-        .stat-value { font-weight: bold; color: white; }
+        .stat-value { font-weight: bold; color: var(--text-main); }
 
         .hp-bar-mini {
           width: 100%;
@@ -289,13 +291,13 @@ const BattleArena = () => {
           75% { transform: translateX(2px); }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 const getBossEmoji = (level) => {
-    const emojis = ['👾', '🤖', '👹', '👺', '🐉', '🦖', '🦕', '🐲'];
-    return emojis[Math.min(level - 1, emojis.length - 1)];
+  const emojis = ['👾', '🤖', '👹', '👺', '🐉', '🦖', '🦕', '🐲'];
+  return emojis[Math.min(level - 1, emojis.length - 1)];
 };
 
 export default BattleArena;

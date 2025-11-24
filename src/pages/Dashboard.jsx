@@ -186,7 +186,8 @@ const Dashboard = ({ onNavigate, onStartWorkout }) => {
                     text-align: center;
                     padding: 16px;
                     margin-bottom: 0;
-                    background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+                    background: var(--bg-card);
+                    border: 1px solid rgba(139, 92, 246, 0.1);
                 }
                 .stat-card.full-width {
                     grid-column: span 2;
@@ -200,7 +201,7 @@ const Dashboard = ({ onNavigate, onStartWorkout }) => {
                 }
                 .stat-info h3 {
                     font-size: 1.5rem;
-                    color: white;
+                    color: var(--text-main);
                     margin-bottom: 2px;
                 }
                 .stat-info p {
