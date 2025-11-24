@@ -1,11 +1,12 @@
+```javascript
 import { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 
 const Login = ({ onNavigate }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { login, loginWithGoogle } = useStore();
+  const { loginWithEmail, loginWithGoogle } = useStore();
 
   const handleGoogleLogin = async () => {
     const result = await loginWithGoogle();
@@ -16,15 +17,17 @@ const Login = ({ onNavigate }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username.trim() && password.trim()) {
-      const result = login(username, password);
+    if (email.trim() && password.trim()) {
+      const result = await loginWithEmail(email, password);
       if (!result.success) {
         setError(result.error);
+      } else {
+        onNavigate('dashboard');
       }
     } else {
-      setError('Please enter username and password');
+      setError('Please enter email and password');
     }
   };
 
@@ -43,15 +46,15 @@ const Login = ({ onNavigate }) => {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Username</label>
+            <label>Email</label>
             <input
-              type="text"
-              value={username}
+              type="email"
+              value={email}
               onChange={(e) => {
-                setUsername(e.target.value);
+                setEmail(e.target.value);
                 setError('');
               }}
-              placeholder="e.g. Hercules"
+              placeholder="Enter your email"
               autoFocus
             />
           </div>
@@ -115,7 +118,7 @@ const Login = ({ onNavigate }) => {
   height: 300px;
   background: var(--primary);
   top: -100px;
-  left: -100px;
+  right: -100px;
   animation: float 10s infinite ease -in -out;
 }
         
@@ -124,7 +127,7 @@ const Login = ({ onNavigate }) => {
   height: 250px;
   background: var(--secondary);
   bottom: -50px;
-  right: -50px;
+  left: -50px;
   animation: float 8s infinite ease -in -out reverse;
 }
 
@@ -235,3 +238,4 @@ const Login = ({ onNavigate }) => {
 };
 
 export default Login;
+```

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { auth, googleProvider, db } from '../firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
 
 const StoreContext = createContext();
@@ -46,7 +46,7 @@ export const StoreProvider = ({ children }) => {
                     } else {
                         // Initialize new user data in Firestore
                         const newData = {
-                            user: { ...INITIAL_USER_STATE, name: user.displayName || user.email.split('@')[0] },
+                            user: { ...INITIAL_USER_STATE, name: user.displayName || user.email?.split('@')[0] || "Athlete" },
                             workouts: []
                         };
                         await setDoc(userRef, newData);
@@ -60,7 +60,7 @@ export const StoreProvider = ({ children }) => {
                         setData(JSON.parse(saved));
                     } else {
                         const newData = {
-                            user: { ...INITIAL_USER_STATE, name: user.displayName || user.email.split('@')[0] },
+                            user: { ...INITIAL_USER_STATE, name: user.displayName || user.email?.split('@')[0] || "Athlete" },
                             workouts: []
                         };
                         setData(newData);
@@ -86,6 +86,26 @@ export const StoreProvider = ({ children }) => {
             return { success: true };
         } catch (error) {
             console.error("Google Login Error:", error);
+            return { success: false, error: error.message };
+        }
+    };
+
+    const loginWithEmail = async (email, password) => {
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            return { success: true };
+        } catch (error) {
+            console.error("Login Error:", error);
+            return { success: false, error: error.message };
+        }
+    };
+
+    const signupWithEmail = async (email, password) => {
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            return { success: true };
+        } catch (error) {
+            console.error("Signup Error:", error);
             return { success: false, error: error.message };
         }
     };
@@ -149,6 +169,8 @@ export const StoreProvider = ({ children }) => {
             theme,
             toggleTheme,
             loginWithGoogle,
+            loginWithEmail,
+            signupWithEmail,
             logout,
             addWorkout,
             updateUserStats

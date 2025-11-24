@@ -1,16 +1,26 @@
+```javascript
 import { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 
 const Signup = ({ onNavigate }) => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const { signup, loginWithGoogle } = useStore();
+  const { signupWithEmail, loginWithGoogle } = useStore();
 
-  const handleSubmit = (e) => {
+  const handleGoogleLogin = async () => {
+    const result = await loginWithGoogle();
+    if (result.success) {
+      onNavigate('dashboard');
+    } else {
+      setError(result.error || 'Google signup failed');
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username.trim() && password.trim()) {
-      const result = signup(username, password);
+    if (email.trim() && password.trim()) {
+      const result = await signupWithEmail(email, password);
       if (!result.success) {
         setError(result.error);
       } else {
@@ -31,20 +41,20 @@ const Signup = ({ onNavigate }) => {
       <div className="card auth-card glass-panel">
         <div className="auth-header">
           <h2>Begin Your Journey</h2>
-          <p className="auth-subtitle">Create a unique username to track your progress.</p>
+          <p className="auth-subtitle">Create an account to track your progress.</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Choose Username</label>
+            <label>Email</label>
             <input
-              type="text"
-              value={username}
+              type="email"
+              value={email}
               onChange={(e) => {
-                setUsername(e.target.value);
+                setEmail(e.target.value);
                 setError('');
               }}
-              placeholder="Choose a username"
+              placeholder="Enter your email"
               autoFocus
             />
           </div>
@@ -228,3 +238,4 @@ const Signup = ({ onNavigate }) => {
 };
 
 export default Signup;
+```
