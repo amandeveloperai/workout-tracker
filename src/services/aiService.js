@@ -17,6 +17,9 @@ export const generateWorkoutPlan = async (apiKey, userContext) => {
       - Goal: ${userContext.goal || "General Fitness"}
       - Recent Activity: ${userContext.recentWorkouts ? userContext.recentWorkouts.length : 0} workouts this week.
       
+      You can include exercises from Strength, Calisthenics, Yoga, Cardio, or Flexibility.
+      For Yoga/Cardio, use 'sets' as 1, 'reps' as 1, and 'weight' as duration in minutes (if applicable) or 0.
+      
       Output strictly in JSON format with this structure:
       {
         "name": "Workout Name",

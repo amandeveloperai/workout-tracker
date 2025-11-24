@@ -99,6 +99,9 @@ export default function App() {
     );
   }
 
+  const boss = userData?.boss || { name: "Iron Titan", level: 1, hp: 1000, maxHp: 1000 };
+  const bossHpPercent = Math.max(0, (boss.hp / boss.maxHp) * 100);
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
@@ -109,6 +112,19 @@ export default function App() {
         <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
           <Text style={styles.logoutText}>🚪</Text>
         </TouchableOpacity>
+      </View>
+
+      <View style={styles.bossCard}>
+        <View style={styles.bossHeader}>
+          <View>
+            <Text style={styles.bossLevel}>BOSS LVL {boss.level}</Text>
+            <Text style={styles.bossName}>{boss.name}</Text>
+          </View>
+          <Text style={styles.bossHp}>{Math.ceil(boss.hp)}/{boss.maxHp} HP</Text>
+        </View>
+        <View style={styles.hpBarBg}>
+          <View style={[styles.hpBarFill, { width: `${bossHpPercent}%` }]} />
+        </View>
       </View>
 
       <FlatList
@@ -123,7 +139,7 @@ export default function App() {
                 <Text style={styles.exercisesCount}>{item.exercises.length} Exercises</Text>
               </View>
               <View style={styles.xpBadge}>
-                <Text style={styles.xpText}>+{item.xpEarned} XP</Text>
+                <Text style={styles.xpText}>+{item.xpEarned || 0} XP</Text>
               </View>
             </View>
             <View style={styles.exercisesList}>
@@ -299,5 +315,45 @@ const styles = StyleSheet.create({
   emptySubtext: {
     color: '#9ca3af',
     textAlign: 'center',
+  },
+  bossCard: {
+    margin: 20,
+    marginBottom: 0,
+    backgroundColor: '#2a1215',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#7f1d1d',
+  },
+  bossHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  bossLevel: {
+    color: '#ef4444',
+    fontSize: 12,
+    fontWeight: 'bold',
+    letterSpacing: 1,
+  },
+  bossName: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  bossHp: {
+    color: '#9ca3af',
+    fontFamily: 'monospace',
+  },
+  hpBarBg: {
+    height: 12,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 6,
+    overflow: 'hidden',
+  },
+  hpBarFill: {
+    height: '100%',
+    backgroundColor: '#ef4444',
   },
 });

@@ -2,17 +2,16 @@ import { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { getNextWeight } from '../utils/progression';
 import { calculateXP, calculateStreak, checkNewBadges, calculateLevel } from '../services/Gamification';
-
-const EXERCISE_LIST = [
-  'Bench Press', 'Squat', 'Deadlift', 'Overhead Press', 'Pull Up', 'Dumbbell Row', 'Lunges'
-];
+import { DEFAULT_EXERCISES } from '../data/exercises';
 
 const WorkoutSession = ({ onFinish }) => {
   const { user, workouts, addWorkout, updateUserStats, updateBossProgress, currentWorkout, setCurrentWorkout } = useStore();
-  const [selectedExercise, setSelectedExercise] = useState(EXERCISE_LIST[0]);
+  const [selectedExercise, setSelectedExercise] = useState('');
 
   const handleAddExercise = () => {
-    const name = selectedExercise;
+    const name = selectedExercise.trim();
+    if (!name) return;
+
     const targetWeight = getNextWeight(name, workouts);
     setCurrentWorkout([...currentWorkout, {
       id: Date.now(),
@@ -22,6 +21,7 @@ const WorkoutSession = ({ onFinish }) => {
       reps: 10,
       weight: targetWeight || 20
     }]);
+    setSelectedExercise(''); // Clear input after adding
   };
 
   const updateExercise = (index, field, value) => {
@@ -138,16 +138,25 @@ const WorkoutSession = ({ onFinish }) => {
       </div>
 
       <div className="add-exercise-section">
-        <select
-          value={selectedExercise}
-          onChange={(e) => setSelectedExercise(e.target.value)}
-          className="exercise-select"
+        <div className="exercise-input-group">
+          <input
+            list="exercise-options"
+            value={selectedExercise}
+            onChange={(e) => setSelectedExercise(e.target.value)}
+            className="exercise-input"
+            placeholder="Type or select exercise..."
+          />
+          <datalist id="exercise-options">
+            {DEFAULT_EXERCISES.map(ex => (
+              <option key={ex} value={ex} />
+            ))}
+          </datalist>
+        </div>
+        <button
+          onClick={handleAddExercise}
+          className="btn-secondary btn-full mt-2"
+          disabled={!selectedExercise.trim()}
         >
-          {EXERCISE_LIST.map(ex => (
-            <option key={ex} value={ex}>{ex}</option>
-          ))}
-        </select>
-        <button onClick={handleAddExercise} className="btn-secondary btn-full mt-2">
           + Add Exercise
         </button>
       </div>
@@ -210,7 +219,7 @@ const WorkoutSession = ({ onFinish }) => {
                     padding: 12px 8px;
                 }
                 
-                .exercise-select {
+                .exercise-input {
                     width: 100%;
                     padding: 16px;
                     background: var(--bg-card);
@@ -218,11 +227,6 @@ const WorkoutSession = ({ onFinish }) => {
                     border-radius: var(--radius-md);
                     color: white;
                     font-size: 1rem;
-                    appearance: none;
-                    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-                    background-repeat: no-repeat;
-                    background-position: right 16px center;
-                    background-size: 16px;
                 }
 
                 .action-bar {
