@@ -5,6 +5,7 @@ import { BADGES, calculateLevel } from '../services/Gamification';
 import BossCard from '../components/BossCard';
 import SettingsModal from '../components/SettingsModal';
 import SenseiModal from '../components/SenseiModal';
+import UserMenu from '../components/UserMenu';
 
 const Dashboard = ({ onNavigate, onStartWorkout }) => {
   const { user, logout, workouts, setCurrentWorkout } = useStore();
@@ -35,12 +36,7 @@ const Dashboard = ({ onNavigate, onStartWorkout }) => {
           <p className="subtitle">Ready to conquer today?</p>
         </div>
         <div className="header-actions">
-          <button onClick={() => setShowSettings(true)} className="btn-icon" aria-label="Settings">
-            ⚙️
-          </button>
-          <button onClick={logout} className="btn-icon" aria-label="Logout">
-            🚪
-          </button>
+          <UserMenu onOpenSettings={() => setShowSettings(true)} />
         </div>
       </header>
 
