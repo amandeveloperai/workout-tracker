@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import { auth, googleProvider, db } from '../firebase';
 import { signInWithPopup, signOut, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, arrayUnion } from 'firebase/firestore';
+import LoadingScreen from '../components/LoadingScreen';
 
 const StoreContext = createContext();
 
@@ -211,7 +212,7 @@ export const StoreProvider = ({ children }) => {
             currentWorkout,
             setCurrentWorkout
         }}>
-            {!loading && children}
+            {loading ? <LoadingScreen /> : children}
         </StoreContext.Provider>
     );
 };
