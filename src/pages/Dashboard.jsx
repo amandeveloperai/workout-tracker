@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { getTodayDate, isSameDay } from '../utils/dateUtils';
 import { BADGES, calculateLevel } from '../services/Gamification';
-import BossCard from '../components/BossCard';
+import BattleArena from '../components/BattleArena';
 import SettingsModal from '../components/SettingsModal';
 import SenseiModal from '../components/SenseiModal';
 import UserMenu from '../components/UserMenu';
@@ -40,7 +40,7 @@ const Dashboard = ({ onNavigate, onStartWorkout }) => {
         </div>
       </header>
 
-      <BossCard />
+      <BattleArena />
 
       <div className="ai-actions mb-4">
         <button className="btn-sensei glass-panel" onClick={() => setShowSensei(true)}>
