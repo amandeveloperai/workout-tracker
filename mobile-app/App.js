@@ -66,7 +66,7 @@ export default function App() {
   if (!user) {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>💪 Shokunin</Text>
+        <Text style={styles.title}>💪 SmartRep</Text>
         <Text style={styles.subtitle}>Login to sync your workouts</Text>
 
         <View style={styles.inputContainer}>

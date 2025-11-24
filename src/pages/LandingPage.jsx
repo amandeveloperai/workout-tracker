@@ -6,7 +6,7 @@ const LandingPage = ({ onGetStarted }) => {
   return (
     <div className="landing-container">
       <nav className="landing-nav">
-        <div className="logo">💪 Shokunin</div>
+        <div className="logo">💪 SmartRep</div>
         <div className="nav-actions">
           <ThemeToggle />
           <button className="btn-login" onClick={() => onGetStarted('login')}>Login</button>
