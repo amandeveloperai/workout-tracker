@@ -18,7 +18,9 @@ const BattleArena = () => {
   const userAvatar = getUserAvatar(user.level);
 
   // Calculate Stats
-  const userStrength = Math.floor(user.xp / 10) + (user.streak * 2);
+  // Strength based on Level (primary) and Streak (bonus)
+  // Level 1 vs Boss Lvl 1 (50 Def) -> User needs ~Level 2 to overpower
+  const userStrength = (user.level * 25) + (user.streak * 5);
   const boss = user.boss || { name: "Iron Titan", level: 1, hp: 1000, maxHp: 1000 };
   const bossDefense = boss.level * 50;
 

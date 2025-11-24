@@ -2,123 +2,129 @@ import { useState, useRef, useEffect } from 'react';
 import { DEFAULT_EXERCISES } from '../data/exercises';
 
 const ExerciseSelector = ({ onAdd }) => {
-    const [inputValue, setInputValue] = useState('');
-    const [isOpen, setIsOpen] = useState(false);
-    const [filteredExercises, setFilteredExercises] = useState([]);
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const inputRef = useRef(null);
-    const dropdownRef = useRef(null);
+  const [inputValue, setInputValue] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [filteredExercises, setFilteredExercises] = useState([]);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
 
-    useEffect(() => {
-        if (inputValue.trim()) {
-            const filtered = DEFAULT_EXERCISES.filter(ex =>
-                ex.toLowerCase().includes(inputValue.toLowerCase())
-            ).slice(0, 8); // Limit to 8 results
-            setFilteredExercises(filtered);
-            setIsOpen(filtered.length > 0);
-        } else {
-            setFilteredExercises([]);
-            setIsOpen(false);
-        }
-        setSelectedIndex(0);
-    }, [inputValue]);
+  useEffect(() => {
+    if (inputValue.trim()) {
+      const filtered = DEFAULT_EXERCISES.filter(ex =>
+        ex.toLowerCase().includes(inputValue.toLowerCase())
+      ).slice(0, 8); // Limit to 8 results
+      setFilteredExercises(filtered);
+      setIsOpen(filtered.length > 0);
+    } else {
+      setFilteredExercises([]);
+      setIsOpen(false);
+    }
+    setSelectedIndex(0);
+  }, [inputValue]);
 
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setIsOpen(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    const handleKeyDown = (e) => {
-        if (!isOpen) {
-            if (e.key === 'Enter') {
-                handleAdd();
-            }
-            return;
-        }
-
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                setSelectedIndex(prev =>
-                    prev < filteredExercises.length - 1 ? prev + 1 : prev
-                );
-                break;
-            case 'ArrowUp':
-                e.preventDefault();
-                setSelectedIndex(prev => prev > 0 ? prev - 1 : 0);
-                break;
-            case 'Enter':
-                e.preventDefault();
-                if (filteredExercises[selectedIndex]) {
-                    selectExercise(filteredExercises[selectedIndex]);
-                } else {
-                    handleAdd();
-                }
-                break;
-            case 'Escape':
-                setIsOpen(false);
-                break;
-        }
-    };
-
-    const selectExercise = (exercise) => {
-        setInputValue(exercise);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
-        inputRef.current?.focus();
+      }
     };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-    const handleAdd = () => {
-        if (inputValue.trim()) {
-            onAdd(inputValue.trim());
-            setInputValue('');
-            setIsOpen(false);
+  const handleKeyDown = (e) => {
+    if (!isOpen) {
+      if (e.key === 'Enter') {
+        handleAdd();
+      }
+      return;
+    }
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        setSelectedIndex(prev =>
+          prev < filteredExercises.length - 1 ? prev + 1 : prev
+        );
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        setSelectedIndex(prev => prev > 0 ? prev - 1 : 0);
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (isOpen && filteredExercises[selectedIndex]) {
+          // Add immediately if selecting from list
+          onAdd(filteredExercises[selectedIndex]);
+          setInputValue('');
+          setIsOpen(false);
+        } else {
+          // Or add current input value
+          handleAdd();
         }
-    };
+        break;
+      case 'Escape':
+        setIsOpen(false);
+        break;
+    }
+  };
 
-    return (
-        <div className="exercise-selector" ref={dropdownRef}>
-            <div className="selector-input-group">
-                <input
-                    ref={inputRef}
-                    type="text"
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onFocus={() => inputValue && setIsOpen(true)}
-                    placeholder="Type or search exercise..."
-                    className="exercise-input-modern"
-                />
-                <button
-                    onClick={handleAdd}
-                    disabled={!inputValue.trim()}
-                    className="btn-add-exercise"
-                >
-                    <span className="add-icon">+</span>
-                </button>
+  const selectExercise = (exercise) => {
+    // Add immediately on click too
+    onAdd(exercise);
+    setInputValue('');
+    setIsOpen(false);
+    inputRef.current?.focus();
+  };
+
+  const handleAdd = () => {
+    if (inputValue.trim()) {
+      onAdd(inputValue.trim());
+      setInputValue('');
+      setIsOpen(false);
+    }
+  };
+
+  return (
+    <div className="exercise-selector" ref={dropdownRef}>
+      <div className="selector-input-group">
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => inputValue && setIsOpen(true)}
+          placeholder="Type or search exercise..."
+          className="exercise-input-modern"
+        />
+        <button
+          onClick={handleAdd}
+          disabled={!inputValue.trim()}
+          className="btn-add-exercise"
+        >
+          <span className="add-icon">+</span>
+        </button>
+      </div>
+
+      {isOpen && filteredExercises.length > 0 && (
+        <div className="exercise-dropdown glass-panel">
+          {filteredExercises.map((exercise, index) => (
+            <div
+              key={exercise}
+              className={`dropdown-item ${index === selectedIndex ? 'selected' : ''}`}
+              onClick={() => selectExercise(exercise)}
+              onMouseEnter={() => setSelectedIndex(index)}
+            >
+              <span className="exercise-icon">💪</span>
+              {exercise}
             </div>
+          ))}
+        </div>
+      )}
 
-            {isOpen && filteredExercises.length > 0 && (
-                <div className="exercise-dropdown glass-panel">
-                    {filteredExercises.map((exercise, index) => (
-                        <div
-                            key={exercise}
-                            className={`dropdown-item ${index === selectedIndex ? 'selected' : ''}`}
-                            onClick={() => selectExercise(exercise)}
-                            onMouseEnter={() => setSelectedIndex(index)}
-                        >
-                            <span className="exercise-icon">💪</span>
-                            {exercise}
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            <style>{`
+      <style>{`
         .exercise-selector {
           position: relative;
           width: 100%;
@@ -247,8 +253,8 @@ const ExerciseSelector = ({ onAdd }) => {
           background: rgba(139, 92, 246, 0.5);
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default ExerciseSelector;
