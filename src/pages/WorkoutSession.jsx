@@ -2,14 +2,12 @@ import { useState } from 'react';
 import { useStore } from '../context/StoreContext';
 import { getNextWeight } from '../utils/progression';
 import { calculateXP, calculateStreak, checkNewBadges, calculateLevel } from '../services/Gamification';
-import { DEFAULT_EXERCISES } from '../data/exercises';
+import ExerciseSelector from '../components/ExerciseSelector';
 
 const WorkoutSession = ({ onFinish }) => {
   const { user, workouts, addWorkout, updateUserStats, updateBossProgress, currentWorkout, setCurrentWorkout } = useStore();
-  const [selectedExercise, setSelectedExercise] = useState('');
 
-  const handleAddExercise = () => {
-    const name = selectedExercise.trim();
+  const handleAddExercise = (name) => {
     if (!name) return;
 
     const targetWeight = getNextWeight(name, workouts);
@@ -21,7 +19,6 @@ const WorkoutSession = ({ onFinish }) => {
       reps: 10,
       weight: targetWeight || 20
     }]);
-    setSelectedExercise(''); // Clear input after adding
   };
 
   const updateExercise = (index, field, value) => {
@@ -138,27 +135,7 @@ const WorkoutSession = ({ onFinish }) => {
       </div>
 
       <div className="add-exercise-section">
-        <div className="exercise-input-group">
-          <input
-            list="exercise-options"
-            value={selectedExercise}
-            onChange={(e) => setSelectedExercise(e.target.value)}
-            className="exercise-input"
-            placeholder="Type or select exercise..."
-          />
-          <datalist id="exercise-options">
-            {DEFAULT_EXERCISES.map(ex => (
-              <option key={ex} value={ex} />
-            ))}
-          </datalist>
-        </div>
-        <button
-          onClick={handleAddExercise}
-          className="btn-secondary btn-full mt-2"
-          disabled={!selectedExercise.trim()}
-        >
-          + Add Exercise
-        </button>
+        <ExerciseSelector onAdd={handleAddExercise} />
       </div>
 
       <div className="action-bar">
