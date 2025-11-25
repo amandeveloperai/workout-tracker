@@ -69,22 +69,28 @@ const WorkoutSession = ({ onFinish }) => {
     const newBadges = checkNewBadges(updatedUser, workout);
 
     // Save everything
-    addWorkout(workout);
-    updateUserStats({
-      streak: newStreak,
-      xp: updatedUser.xp,
-      level: updatedUser.level,
-      lastWorkoutDate: updatedUser.lastWorkoutDate,
-      badges: [...user.badges, ...newBadges]
-    });
+    try {
+      await addWorkout(workout);
+      await updateUserStats({
+        streak: newStreak,
+        xp: updatedUser.xp,
+        level: updatedUser.level,
+        lastWorkoutDate: updatedUser.lastWorkoutDate,
+        badges: [...user.badges, ...newBadges]
+      });
 
-    const bossResult = await updateBossProgress(damage);
+      const bossResult = await updateBossProgress(damage);
 
-    if (bossResult?.defeated) {
-      setDefeatedBoss(bossResult.boss);
-      setShowVictory(true);
-    } else {
-      setCurrentWorkout([]); // Clear workout
+      if (bossResult?.defeated) {
+        setDefeatedBoss(bossResult.boss);
+        setShowVictory(true);
+      } else {
+        setCurrentWorkout([]); // Clear workout
+        onFinish();
+      }
+    } catch (error) {
+      console.error("Error saving workout session:", error);
+      // Handle error (maybe show toast)
       onFinish();
     }
   };

@@ -146,6 +146,7 @@ export const StoreProvider = ({ children }) => {
                 });
             } catch (error) {
                 console.error("Error saving workout:", error);
+                throw error; // Rethrow to let caller know
             }
         }
     };
@@ -168,6 +169,7 @@ export const StoreProvider = ({ children }) => {
                 await updateDoc(userRef, firestoreUpdates);
             } catch (error) {
                 console.error("Error updating stats:", error);
+                throw error; // Rethrow
             }
         }
     };
