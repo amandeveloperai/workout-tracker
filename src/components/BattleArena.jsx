@@ -18,11 +18,13 @@ const BattleArena = () => {
   const userAvatar = getUserAvatar(user.level);
 
   // Calculate Stats
-  // Strength based on Level (primary) and Streak (bonus)
-  // Level 1 vs Boss Lvl 1 (50 Def) -> User needs ~Level 2 to overpower
-  const userStrength = (user.level * 25) + (user.streak * 5);
+  // Strength: Base 10 + (Level * 10) + (Streak * 2)
+  // Defense: Base 20 + (Level * 15)
+  // Lvl 1 User (20) vs Lvl 1 Boss (35) -> Underdog
+  // Lvl 3 User (40) vs Lvl 1 Boss (35) -> Overpower
+  const userStrength = 10 + (user.level * 10) + (user.streak * 2);
   const boss = user.boss || { name: "Iron Titan", level: 1, hp: 1000, maxHp: 1000 };
-  const bossDefense = boss.level * 50;
+  const bossDefense = 20 + (boss.level * 15);
 
   // Battle Status
   const isOverpowered = userStrength > bossDefense;
@@ -43,12 +45,12 @@ const BattleArena = () => {
 
       {showInfo && (
         <div className="arena-info">
-          <p><strong>How to Play:</strong></p>
+          <p><strong>Battle Mechanics:</strong></p>
           <ul>
-            <li>Your <strong>Avatar</strong> evolves as you level up.</li>
-            <li><strong>Strength</strong> comes from XP and Streaks.</li>
-            <li>Deal damage by completing workouts!</li>
-            <li>If <strong>Strength {'>'} Defense</strong>, you deal <strong>CRITICAL</strong> damage!</li>
+            <li><strong>Strength:</strong> Increases with Level & Streak.</li>
+            <li><strong>Defense:</strong> Bosses get tougher each level.</li>
+            <li><strong>Goal:</strong> Reach <strong>Level 3</strong> to overpower the first boss!</li>
+            <li><strong>Crit Chance:</strong> If Strength {'>'} Defense, you deal bonus damage.</li>
           </ul>
         </div>
       )}
