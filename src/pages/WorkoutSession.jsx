@@ -39,8 +39,11 @@ const WorkoutSession = ({ onFinish }) => {
     setCurrentWorkout(newExercises);
   };
 
+  const [isSaving, setIsSaving] = useState(false);
+
   const handleFinishWorkout = async () => {
     if (currentWorkout.length === 0) return;
+    setIsSaving(true);
 
     const workout = {
       id: crypto.randomUUID(),
@@ -92,6 +95,8 @@ const WorkoutSession = ({ onFinish }) => {
       console.error("Error saving workout session:", error);
       // Handle error (maybe show toast)
       onFinish();
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -165,18 +170,22 @@ const WorkoutSession = ({ onFinish }) => {
       </div>
 
       <div className="add-exercise-section">
-        <ExerciseSelector onAdd={handleAddExercise} />
+        <ExerciseSelector onAdd={handleAddExercise} direction="up" />
       </div>
 
       <div className="action-bar">
-        <button onClick={handleFinishWorkout} className="btn-primary btn-full finish-btn">
-          Finish Workout
+        <button
+          onClick={handleFinishWorkout}
+          className="btn-primary btn-full finish-btn"
+          disabled={isSaving}
+        >
+          {isSaving ? 'Saving...' : 'Finish Workout'}
         </button>
       </div>
 
       <style>{`
                 .workout-session {
-                    padding-bottom: 80px;
+                    padding-bottom: 160px; /* Increased padding for mobile scroll */
                 }
                 .header-controls {
                     display: flex;
@@ -253,18 +262,24 @@ const WorkoutSession = ({ onFinish }) => {
 
                 .action-bar {
                     position: fixed;
-                    bottom: 90px; /* Above nav bar */
+                    bottom: 80px; /* Adjusted for mobile nav */
                     left: 50%;
                     transform: translateX(-50%);
-                    width: calc(100% - 40px);
-                    max-width: 400px;
+                    width: calc(100% - 32px);
+                    max-width: 500px;
                     z-index: 90;
+                    padding: 0 10px;
                 }
                 
                 .finish-btn {
                     box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
                     font-size: 1.1rem;
                     padding: 16px;
+                    transition: all 0.2s;
+                }
+                .finish-btn:disabled {
+                    opacity: 0.7;
+                    transform: scale(0.98);
                 }
                 
                 .mb-2 { margin-bottom: 16px; }

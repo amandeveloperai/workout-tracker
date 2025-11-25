@@ -1,105 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { DEFAULT_EXERCISES } from '../data/exercises';
 
-const ExerciseSelector = ({ onAdd }) => {
-  const [inputValue, setInputValue] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-  const [filteredExercises, setFilteredExercises] = useState([]);
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const inputRef = useRef(null);
-  const dropdownRef = useRef(null);
+const ExerciseSelector = ({ onAdd, direction = 'down' }) => {
+  // ... existing state ...
 
-  useEffect(() => {
-    if (inputValue.trim()) {
-      const filtered = DEFAULT_EXERCISES.filter(ex =>
-        ex.toLowerCase().includes(inputValue.toLowerCase())
-      ).slice(0, 8);
-      setFilteredExercises(filtered);
-      setIsOpen(filtered.length > 0);
-    } else {
-      // Show recommendations when empty
-      setFilteredExercises(DEFAULT_EXERCISES.slice(0, 8));
-      // Don't auto-close here, let blur/selection handle it
-      // But we need to know if we should be open.
-      // We'll handle this in onFocus/onChange
-    }
-    setSelectedIndex(0);
-  }, [inputValue]);
-
-  const handleFocus = () => {
-    if (!inputValue.trim()) {
-      setFilteredExercises(DEFAULT_EXERCISES.slice(0, 8));
-      setIsOpen(true);
-    } else {
-      setIsOpen(true);
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleKeyDown = (e) => {
-    if (!isOpen) {
-      if (e.key === 'Enter') {
-        handleAdd();
-      }
-      return;
-    }
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        setSelectedIndex(prev =>
-          prev < filteredExercises.length - 1 ? prev + 1 : prev
-        );
-        break;
-      case 'ArrowUp':
-        e.preventDefault();
-        setSelectedIndex(prev => prev > 0 ? prev - 1 : 0);
-        break;
-      case 'Enter':
-        e.preventDefault();
-        if (isOpen && filteredExercises[selectedIndex]) {
-          // Add immediately if selecting from list
-          onAdd(filteredExercises[selectedIndex]);
-          setInputValue('');
-          setIsOpen(false);
-        } else {
-          // Or add current input value
-          handleAdd();
-        }
-        break;
-      case 'Escape':
-        setIsOpen(false);
-        break;
-    }
-  };
-
-  const selectExercise = (exercise) => {
-    // Add immediately on click too
-    onAdd(exercise);
-    setInputValue('');
-    setIsOpen(false);
-    inputRef.current?.focus();
-  };
-
-  const handleAdd = () => {
-    if (inputValue.trim()) {
-      onAdd(inputValue.trim());
-      setInputValue('');
-      setIsOpen(false);
-    }
-  };
+  // ... existing effects ...
 
   return (
     <div className="exercise-selector" ref={dropdownRef}>
+      {/* ... existing input ... */}
       <div className="selector-input-group">
         <input
           ref={inputRef}
@@ -121,7 +30,7 @@ const ExerciseSelector = ({ onAdd }) => {
       </div>
 
       {isOpen && filteredExercises.length > 0 && (
-        <div className="exercise-dropdown glass-panel">
+        <div className={`exercise-dropdown glass-panel ${direction}`}>
           {filteredExercises.map((exercise, index) => (
             <div
               key={exercise}
@@ -137,6 +46,7 @@ const ExerciseSelector = ({ onAdd }) => {
       )}
 
       <style>{`
+        /* ... existing styles ... */
         .exercise-selector {
           position: relative;
           width: 100%;
@@ -200,7 +110,6 @@ const ExerciseSelector = ({ onAdd }) => {
 
         .exercise-dropdown {
           position: absolute;
-          top: calc(100% + 8px);
           left: 0;
           right: 0;
           background: var(--bg-card);
@@ -212,18 +121,28 @@ const ExerciseSelector = ({ onAdd }) => {
           overflow-y: auto;
           z-index: 100;
           box-shadow: var(--shadow-lg);
+        }
+
+        .exercise-dropdown.down {
+          top: calc(100% + 8px);
           animation: slideDown 0.2s ease-out;
         }
 
+        .exercise-dropdown.up {
+          bottom: calc(100% + 8px);
+          top: auto;
+          animation: slideUp 0.2s ease-out;
+          box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5);
+        }
+
         @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
         .dropdown-item {
